@@ -50,9 +50,8 @@ private:
 public:
     void addEdge(const string &node1, const string &node2, float weight) {
         adjList[node1].push_back({node2, weight});
-        adjList[node2].push_back({node1, weight}); // Assuming undirected graph
+        adjList[node2].push_back({node1, weight});
     }
-
     void displayGraph() {
         for (auto &node : adjList) {
             cout << "Node " << node.first << ":\n";
