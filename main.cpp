@@ -33,6 +33,24 @@ Node parseTSVRow(const string &row) {
     return Node(id, title, isAdult, year, runtime, genres, rating, numOfRatings);
 }
 
+float calculateWeight(const Node &node1, const Node &node2) {
+    // Example weight calculation based on genre similarity and rating difference
+    set<string> genres1(node1.genres.begin(), node1.genres.end());
+    set<string> genres2(node2.genres.begin(), node2.genres.end());
+
+    // Calculate intersection size (common genres)
+    vector<string> commonGenres;
+    set_intersection(genres1.begin(), genres1.end(), genres2.begin(), genres2.end(),
+                     back_inserter(commonGenres));
+    int commonGenreCount = commonGenres.size();
+
+    // Calculate rating difference
+    float ratingDifference = fabs(node1.rating - node2.rating);
+
+    // Define weight as a combination of these metrics
+    return 1.0 / (1 + commonGenreCount + ratingDifference); // Higher similarity => Lower weight
+}
+
 int main() {
     ifstream file("resources/datasets/dataset.final.tsv");
     if (!file.is_open()) {
@@ -41,13 +59,26 @@ int main() {
     }
 
     string row;
+    vector<Node> nodes;    // Store all nodes
+    Graph movieGraph;      // Graph object
+
     while (getline(file, row)) {
         Node movie = parseTSVRow(row);
+        nodes.push_back(movie); // Store the node in a vector
         //movie.display();
         //cout << "-----------------------------------" << endl;
     }
 
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        for (size_t j = i + 1; j < nodes.size(); ++j) {
+            float weight = calculateWeight(nodes[i], nodes[j]);
+            movieGraph.addEdge(nodes[i].id, nodes[j].id, weight);
+        }
+    }
+
     file.close();
+
+    movieGraph.displayGraph();
 
     return 0;
 }
