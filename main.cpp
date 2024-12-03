@@ -101,12 +101,40 @@ float calculateWeight(const Node &node1, const Node &node2) {
     float logMetric1 = log(combinedMetric1);
     float logMetric2 = log(combinedMetric2);
 
-    float weight1 = 10000 / (logMetric1 * 3);
-    float weight2 = 10000 / (logMetric2 * 3);
+    float weight1 = 10000 / (logMetric1 * 4) + abs(stoi(node1.year) - stoi(node2.year))/6 + abs(stoi(node1.runtime) - stoi(node2.runtime))/10;
+    float weight2 = 10000 / (logMetric2 * 4) + abs(stoi(node1.year) - stoi(node2.year))/6 + abs(stoi(node1.runtime) - stoi(node2.runtime))/10;
 
     // Return the average weight of the two movies
     return (weight1 + weight2) / 2.0f;
 }
+#include <random>
+#include <unordered_map>
+#include <cstdlib> // For random number generation
+#include <ctime>   // For seeding random numbers
+vector<string> randomWalk(const Graph &graph, const string &startNode, int maxMovies = 5) {
+    vector<string> visitedMovies;
+    string currentNode = startNode;
+
+    // Seed random number generator
+    srand(static_cast<unsigned>(time(0)));
+
+    for (int step = 0; step < maxMovies + 1; ++step) { // Walk one extra step to omit the starting node
+        // Move to a random neighbor
+        if (!graph.adjList.at(currentNode).empty()) {
+            const auto &neighbors = graph.adjList.at(currentNode);
+            int randomIndex = rand() % neighbors.size();
+            currentNode = neighbors[randomIndex].first;
+        }
+
+        visitedMovies.push_back(currentNode);
+    }
+
+    // Omit the starting node
+    visitedMovies.erase(visitedMovies.begin());
+
+    return visitedMovies;
+}
+
 
 int main() {
     ifstream file("resources/datasets/movies_filtered.tsv");
@@ -181,17 +209,20 @@ int main() {
             }
         }
     }
-
+    bool rw = false;
     bool dijsktra = false;
     if (isFound) {
         cout << endl << "SUCCESS! Movie found." << endl;
         movieNode.display();
         cout << endl;
-        cout << "Select searching algorithim. (D) for Dijkstra's algorithm or (X) for X" << endl;
+        cout << "Select searching algorithim. (D) for Dijkstra's algorithm or (R) for random walk" << endl;
         char choice;
         cin >> choice;
         if (choice == 'D') {
             dijsktra = true;
+        }
+        if (choice == 'R') {
+            rw = true;
         }
     }
 
@@ -209,6 +240,19 @@ int main() {
     }
 }
 
+    if (rw) {
+    cout << "You have chosen Random Walk." << endl;
+
+    vector<string> visitedMovies = randomWalk(movieGraph, movieNode.id);
+
+    cout << "Movies visited during the random walk (up to 5 movies):\n";
+    for (const string &movieId : visitedMovies) {
+        auto it = find_if(nodes.begin(), nodes.end(), [&](const Node &node) { return node.id == movieId; });
+        if (it != nodes.end()) {
+            cout << "Title: " << it->title << endl;
+        }
+    }
+}
     
     if (!isFound) {
         cout << "ERROR! Could not find movie." << endl;
