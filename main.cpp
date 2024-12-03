@@ -73,7 +73,6 @@ int main() {
         for (size_t j = i + 1; j < nodes.size(); ++j) {
             float weight = calculateWeight(nodes[i], nodes[j]);
             movieGraph.addEdge(nodes[i].id, nodes[j].id, weight);
-            cout << i << endl;
         }
     }
 
