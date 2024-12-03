@@ -100,8 +100,60 @@ int main() {
             }
         }
     }
-    movieGraph.displayGraph();
+    //movieGraph.displayGraph();
 
     file.close();
+
+    cout << "Enter movie that you like: ";
+    string movie;
+    Node movieNode;
+    getline(cin, movie);
+
+    bool isFound = false;
+
+    for (auto node : nodes) {
+        if (node.title == movie) {
+            isFound = true;
+            movieNode = node;
+        }
+    }
+
+    for (auto key : movieGraph.adjList) {
+        if (key.first == movieNode.id) {
+            for (auto neighbor : key.second) {
+                cout << neighbor.first << ' ' << neighbor.second << endl;
+            }
+        }
+    }
+
+    bool dijsktra = false;
+    if (isFound) {
+        cout << endl << "SUCCESS! Movie found." << endl;
+        movieNode.display();
+        cout << endl;
+        cout << "Select searching algorithim. (D) for Dijkstra's algorithm or (X) for X" << endl;
+        char choice;
+        cin >> choice;
+        if (choice == 'D') {
+            dijsktra = true;
+        }
+    }
+
+    if (dijsktra) {
+        cout << "You have chosen Dijkstra's algorithm." << endl;
+
+        // Run Dijkstra's algorithm and get the first 5 nodes starting from the chosen movie
+        vector<string> closestMovies = movieGraph.dijkstra(movieNode.id, 5, nodes);
+
+        cout << "\nTop 5 closest movies to '" << movieNode.title << "':" << endl;
+        for (const string &movieTitle : closestMovies) {
+            cout << movieTitle << endl;
+        }
+    }
+    
+    if (!isFound) {
+        cout << "ERROR! Could not find movie." << endl;
+    }
+
     return 0;
 }
