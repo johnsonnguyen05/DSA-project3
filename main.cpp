@@ -52,7 +52,7 @@ float calculateWeight(const Node &node1, const Node &node2) {
 }
 
 int main() {
-    ifstream file("resources/datasets/dataset.final.tsv");
+    ifstream file("filtered_output.tsv");
     if (!file.is_open()) {
         cerr << "Error opening file" << endl;
         return 1;
@@ -73,6 +73,7 @@ int main() {
         for (size_t j = i + 1; j < nodes.size(); ++j) {
             float weight = calculateWeight(nodes[i], nodes[j]);
             movieGraph.addEdge(nodes[i].id, nodes[j].id, weight);
+            cout << i << endl;
         }
     }
 
