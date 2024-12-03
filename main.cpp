@@ -9,6 +9,62 @@ vector<string> split(const string &str, char delimiter) {
     }
     return tokens;
 }
+#include <queue> // For priority queue
+
+// Function to run Dijkstra's algorithm
+vector<pair<string, float>> dijkstra(const Graph &graph, const string &startNode, int topN = 5) {
+    unordered_map<string, float> distances; // Distance to each node
+    unordered_map<string, string> previous; // Previous node in path
+    priority_queue<pair<float, string>, vector<pair<float, string>>, greater<>> pq;
+
+    // Initialize distances
+    for (const auto &node : graph.adjList) {
+        distances[node.first] = numeric_limits<float>::infinity();
+    }
+    distances[startNode] = 0.0f;
+
+    // Push the starting node into the priority queue
+    pq.push({0.0f, startNode});
+
+    while (!pq.empty()) {
+        auto [currentDist, currentNode] = pq.top();
+        pq.pop();
+
+        if (currentDist > distances[currentNode]) {
+            continue;
+        }
+
+        // Explore neighbors
+        for (const auto &[neighbor, weight] : graph.adjList.at(currentNode)) {
+            float newDist = currentDist + weight;
+            if (newDist < distances[neighbor]) {
+                distances[neighbor] = newDist;
+                previous[neighbor] = currentNode;
+                pq.push({newDist, neighbor});
+            }
+        }
+    }
+
+    // Collect the top N nodes with the shortest distances
+    vector<pair<string, float>> results;
+    for (const auto &[node, dist] : distances) {
+        if (node != startNode && dist < numeric_limits<float>::infinity()) {
+            results.push_back({node, dist});
+        }
+    }
+
+    // Sort results by distance and take the top N
+    sort(results.begin(), results.end(), [](const pair<string, float> &a, const pair<string, float> &b) {
+        return a.second < b.second;
+    });
+
+    if (results.size() > topN) {
+        results.resize(topN);
+    }
+
+    return results;
+}
+
 Node parseTSVRow(const string &row) {
     stringstream ss(row);
     string id, type, title, year, genresStr, altTitleStr, runtimeStr, ratingStr, numOfRatingsStr;
@@ -140,16 +196,19 @@ int main() {
     }
 
     if (dijsktra) {
-        cout << "You have chosen Dijkstra's algorithm." << endl;
+    cout << "You have chosen Dijkstra's algorithm." << endl;
 
-        // Run Dijkstra's algorithm and get the first 5 nodes starting from the chosen movie
-        vector<string> closestMovies = movieGraph.dijkstra(movieNode.id, 5, nodes);
+    vector<pair<string, float>> recommendations = dijkstra(movieGraph, movieNode.id);
 
-        cout << "\nTop 5 closest movies to '" << movieNode.title << "':" << endl;
-        for (const string &movieTitle : closestMovies) {
-            cout << movieTitle << endl;
+    cout << "Top recommendations based on shortest path:\n";
+    for (const auto &[movieId, distance] : recommendations) {
+        auto it = find_if(nodes.begin(), nodes.end(), [&](const Node &node) { return node.id == movieId; });
+        if (it != nodes.end()) {
+            cout << "Title: " << it->title << ", Distance: " << distance << endl;
         }
     }
+}
+
     
     if (!isFound) {
         cout << "ERROR! Could not find movie." << endl;
