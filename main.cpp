@@ -79,7 +79,7 @@ int main() {
 
     file.close();
 
-    movieGraph.displayGraph();
+    //movieGraph.displayGraph();
 
     return 0;
 }
