@@ -9,7 +9,6 @@ vector<string> split(const string &str, char delimiter) {
     }
     return tokens;
 }
-
 Node parseTSVRow(const string &row) {
     stringstream ss(row);
     string id, type, title, year, genresStr, isAdultStr, runtimeStr, ratingStr, numOfRatingsStr;
@@ -54,7 +53,7 @@ float calculateWeight(const Node &node1, const Node &node2) {
 }
 
 int main() {
-    ifstream file("filtered_output.tsv");
+    ifstream file("resources/datasets/movies_filtered.tsv");
     if (!file.is_open()) {
         cerr << "Error opening file" << endl;
         return 1;
@@ -78,30 +77,30 @@ int main() {
     }
     // Step 1: Build genre buckets
     cout << nodes.size() << endl;
-unordered_map<int, vector<int>> genreHashBuckets;
-for (int i = 0; i < nodes.size(); ++i) {
-    int hashValue = 0;
-    for (const string &genre : nodes[i].genres) {
-        hashValue ^= hash<string>{}(genre); // XOR genre hashes
-    }
+    unordered_map<int, vector<int>> genreHashBuckets;
+    for (int i = 0; i < nodes.size(); ++i) {
+        int hashValue = 0;
+        for (const string &genre : nodes[i].genres) {
+            hashValue ^= hash<string>{}(genre); // XOR genre hashes
+        }
     genreHashBuckets[hashValue].push_back(i);
-}
+    }
 
-// Step 2: Create edges only within the same bucket
-for (const auto &[hashValue, indices] : genreHashBuckets) {
-    #pragma omp parallel for // Optional for multi-threading
-    for (size_t i = 0; i < indices.size(); ++i) {
-        int index1 = indices[i];
+    // Step 2: Create edges only within the same bucket
+    for (const auto &[hashValue, indices] : genreHashBuckets) {
+        #pragma omp parallel for // Optional for multi-threading
+        for (size_t i = 0; i < indices.size(); ++i) {
+            int index1 = indices[i];
 
-        for (size_t j = i + 1; j < indices.size(); ++j) {
-            int index2 = indices[j];
-            
-            float weight = calculateWeight(nodes[index1], nodes[index2]); // Simplified or exact
-            movieGraph.addEdge(nodes[index1].id, nodes[index2].id, weight);
+            for (size_t j = i + 1; j < indices.size(); ++j) {
+                int index2 = indices[j];
+                
+                float weight = calculateWeight(nodes[index1], nodes[index2]); // Simplified or exact
+                movieGraph.addEdge(nodes[index1].id, nodes[index2].id, weight);
+            }
         }
     }
-}
-movieGraph.displayGraph();
+    movieGraph.displayGraph();
 
     file.close();
     return 0;

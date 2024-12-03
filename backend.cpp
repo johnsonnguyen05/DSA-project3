@@ -7,7 +7,6 @@
 #include <set>
 #include <cmath>
 #include <algorithm>
-
 using namespace std;
 
 class Node {
@@ -46,7 +45,6 @@ public:
 class Graph {
 private:
     unordered_map<string, vector<pair<string, float>>> adjList; // Map Node ID to a list of pairs (Neighbor ID, Weight)
-
 public:
     void addEdge(const string &node1, const string &node2, float weight) {
         adjList[node1].push_back({node2, weight});
