@@ -13,17 +13,17 @@ class Node {
 public:
     string id;
     string title;
-    bool isAdult;
+    string altTitle;
     string year;
     string runtime;
     vector<string> genres;
     float rating;
     int numOfRatings;
 public:
-    Node(string id, string title, bool isAdult, string year, string runtime, vector<string> genres, float rating, int numOfRatings) {
+    Node(string id, string title, string isAdult, string year, string runtime, vector<string> genres, float rating, int numOfRatings) {
         this->id = id;
         this->title = title;
-        this->isAdult = isAdult;
+        this->altTitle = altTitle;
         this->year = year;
         this->runtime = runtime;
         this->genres = genres;
@@ -31,7 +31,7 @@ public:
         this->numOfRatings = numOfRatings;
     }
     void display() {
-        cout << "ID: " << id << "\nTitle: " << title << "\nAdult: " << isAdult << "\nYear: " << year << "\nRuntime: " << runtime << "\nGenres: ";
+        cout << "ID: " << id << "\nTitle: " << title << "\nAltTitle: " << altTitle << "\nYear: " << year << "\nRuntime: " << runtime << "\nGenres: ";
         for (auto genre : genres) {
             cout << genre << " ";
         }

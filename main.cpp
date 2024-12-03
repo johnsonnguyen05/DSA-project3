@@ -11,25 +11,25 @@ vector<string> split(const string &str, char delimiter) {
 }
 Node parseTSVRow(const string &row) {
     stringstream ss(row);
-    string id, type, title, year, genresStr, isAdultStr, runtimeStr, ratingStr, numOfRatingsStr;
+    string id, type, title, year, genresStr, altTitleStr, runtimeStr, ratingStr, numOfRatingsStr;
 
     getline(ss, id, '\t');          // ID
     getline(ss, type, '\t');        // Type (ignored)
     getline(ss, title, '\t');       // Title
-    getline(ss, isAdultStr, '\t');  // Is Adult
+    getline(ss, altTitleStr, '\t');  // Alt Title
     getline(ss, year, '\t');        // Year
     getline(ss, runtimeStr, '\t');  // Runtime
     getline(ss, genresStr, '\t');   // Genres
     getline(ss, ratingStr, '\t');   // Rating
     getline(ss, numOfRatingsStr);   // Number of Ratings
 
-    bool isAdult = stoi(isAdultStr);
+    string altTitle = altTitleStr;
     string runtime = runtimeStr;
     float rating = stof(ratingStr);
     int numOfRatings = stoi(numOfRatingsStr);
     vector<string> genres = split(genresStr, ',');
 
-    return Node(id, title, isAdult, year, runtime, genres, rating, numOfRatings);
+    return Node(id, title, altTitle, year, runtime, genres, rating, numOfRatings);
 }
 float calculateWeight(const Node &node1, const Node &node2) {
     // Combine ratings and number of ratings for weight calculation
