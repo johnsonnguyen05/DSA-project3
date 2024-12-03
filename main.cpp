@@ -32,23 +32,25 @@ Node parseTSVRow(const string &row) {
 
     return Node(id, title, isAdult, year, runtime, genres, rating, numOfRatings);
 }
-
 float calculateWeight(const Node &node1, const Node &node2) {
-    // Example weight calculation based on genre similarity and rating difference
-    set<string> genres1(node1.genres.begin(), node1.genres.end());
-    set<string> genres2(node2.genres.begin(), node2.genres.end());
+    // Combine ratings and number of ratings for weight calculation
+    float combinedMetric1 = node1.numOfRatings * node1.rating;
+    float combinedMetric2 = node2.numOfRatings * node2.rating;
 
-    // Calculate intersection size (common genres)
-    vector<string> commonGenres;
-    set_intersection(genres1.begin(), genres1.end(), genres2.begin(), genres2.end(),
-                     back_inserter(commonGenres));
-    int commonGenreCount = commonGenres.size();
+    // Avoid log(0) by ensuring the metric is > 0
+    if (combinedMetric1 <= 0 || combinedMetric2 <= 0) {
+        return 10000; // Assign max weight for unratable movies
+    }
 
-    // Calculate rating difference
-    float ratingDifference = fabs(node1.rating - node2.rating);
+    // Compute the weight
+    float logMetric1 = log(combinedMetric1);
+    float logMetric2 = log(combinedMetric2);
 
-    // Define weight as a combination of these metrics
-    return 1.0 / (1 + commonGenreCount + ratingDifference); // Higher similarity => Lower weight
+    float weight1 = 10000 / (logMetric1 * 3);
+    float weight2 = 10000 / (logMetric2 * 3);
+
+    // Return the average weight of the two movies
+    return (weight1 + weight2) / 2.0f;
 }
 
 int main() {
@@ -59,26 +61,48 @@ int main() {
     }
 
     string row;
-    vector<Node> nodes;    // Store all nodes
-    Graph movieGraph;      // Graph object
+    vector<Node> nodes;                   // Store all nodes
+    unordered_map<string, vector<int>> genreMap; // Map genre to list of movie indices
+    Graph movieGraph;                     // Graph object
 
+    // Read nodes and populate genre map
     while (getline(file, row)) {
         Node movie = parseTSVRow(row);
+        int index = nodes.size();
         nodes.push_back(movie); // Store the node in a vector
-        //movie.display();
-        //cout << "-----------------------------------" << endl;
-    }
 
-    for (size_t i = 0; i < nodes.size(); ++i) {
-        for (size_t j = i + 1; j < nodes.size(); ++j) {
-            float weight = calculateWeight(nodes[i], nodes[j]);
-            movieGraph.addEdge(nodes[i].id, nodes[j].id, weight);
+        // Add movie index to genre map for each genre
+        for (const string &genre : movie.genres) {
+            genreMap[genre].push_back(index);
         }
     }
+    // Step 1: Build genre buckets
+    cout << nodes.size() << endl;
+unordered_map<int, vector<int>> genreHashBuckets;
+for (int i = 0; i < nodes.size(); ++i) {
+    int hashValue = 0;
+    for (const string &genre : nodes[i].genres) {
+        hashValue ^= hash<string>{}(genre); // XOR genre hashes
+    }
+    genreHashBuckets[hashValue].push_back(i);
+}
+
+// Step 2: Create edges only within the same bucket
+for (const auto &[hashValue, indices] : genreHashBuckets) {
+    #pragma omp parallel for // Optional for multi-threading
+    for (size_t i = 0; i < indices.size(); ++i) {
+        int index1 = indices[i];
+
+        for (size_t j = i + 1; j < indices.size(); ++j) {
+            int index2 = indices[j];
+            
+            float weight = calculateWeight(nodes[index1], nodes[index2]); // Simplified or exact
+            movieGraph.addEdge(nodes[index1].id, nodes[index2].id, weight);
+        }
+    }
+}
+movieGraph.displayGraph();
 
     file.close();
-
-    //movieGraph.displayGraph();
-
     return 0;
 }
