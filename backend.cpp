@@ -10,6 +10,9 @@
 #include <limits>
 #include <functional>
 #include <queue>
+#include <random>
+#include <cstdlib>
+#include <ctime> 
 using namespace std;
 
 class Node {
@@ -44,8 +47,7 @@ public:
 
 class Graph {
 public:
-    unordered_map<string, vector<pair<string, float>>> adjList; // Map Node ID to a list of pairs (Neighbor ID, Weight)
-public:
+    unordered_map<string, vector<pair<string, float>>> adjList; 
     void addEdge(const string &node1, const string &node2, float weight) {
         adjList[node1].push_back({node2, weight});
         adjList[node2].push_back({node1, weight});
