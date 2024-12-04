@@ -165,7 +165,7 @@ int main() {
 
     file.close();
 
-    cout << "Enter movie that you like: ";
+    cout << "Enter a movie that you like: ";
     string movie;
     Node movieNode;
     getline(cin, movie);
@@ -194,7 +194,7 @@ int main() {
         cout << endl << "SUCCESS! Movie found." << endl;
         //movieNode.display();
         cout << endl;
-        cout << "Select searching algorithim. (D) for Dijkstra's algorithm or (R) for random walk" << endl;
+        cout << "Select searching algorithim. (D) for Dijkstra's algorithm or (R) for random walk." << endl;
         char choice;
         cin >> choice;
         if (choice == 'D') {
@@ -228,7 +228,7 @@ int main() {
 
         vector<string> visitedMovies = randomWalk(movieGraph, movieNode.id);
 
-        cout << "Movies visited during the random walk (up to 5 movies):\n";
+        cout << "5 random movies you might enjoy:\n";
         for (const string &movieId : visitedMovies) {
             auto it = find_if(nodes.begin(), nodes.end(), [&](const Node &node) { return node.id == movieId; });
             if (it != nodes.end()) {
