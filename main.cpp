@@ -119,6 +119,7 @@ vector<string> randomWalk(const Graph &graph, const string &startNode, int maxMo
 
 
 int main() {
+    cout << "Welcome to iLoveMovies!" << endl;
     ifstream file("resources/datasets/movies_filtered.tsv");
     if (!file.is_open()) {
         cerr << "Error opening file" << endl;
